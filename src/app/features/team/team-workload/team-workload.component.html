@@ -5,7 +5,7 @@
       Carga de Trabajo
     </h1>
 
-    <div class="area-selector" *ngIf="allAreas().length > 1">
+    <div class="area-selector" *ngIf="allAreas().length > 0">
       <select class="form-select form-select-sm" (change)="onAreaChange($event)">
         <option *ngFor="let area of allAreas()" [value]="area.areaId" [selected]="area.areaId === selectedAreaId()">
           {{ area.areaName }}

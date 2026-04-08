@@ -58,6 +58,20 @@ export class TeamWorkloadComponent implements OnInit {
         this.loading.set(false);
       }
     });
+
+    this.ticketService.getTeamTickets(areaId, 1, 100).subscribe({
+      next: (result) => {
+        const stats: Record<number, number> = {};
+        for (const ticket of result.items) {
+          if (ticket.assignedTo) {
+            const uid = ticket.assignedTo.userId;
+            stats[uid] = (stats[uid] ?? 0) + 1;
+          }
+        }
+        this.ticketStats.set(stats);
+      },
+      error: () => {}
+    });
   }
 
   onAreaChange(event: Event): void {
