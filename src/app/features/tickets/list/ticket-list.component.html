@@ -1,0 +1,158 @@
+<div class="ticket-list-container">
+  <div class="page-header mb-4">
+    <h1 class="page-title">
+      <i class="fas fa-list-check"></i>
+      Tickets
+    </h1>
+    <div class="header-actions">
+      <a routerLink="/create-incident" class="btn btn-primary btn-sm">
+        <i class="fas fa-exclamation-triangle"></i>
+        Nuevo Incidente
+      </a>
+      <a routerLink="/create-requirement" class="btn btn-primary btn-sm">
+        <i class="fas fa-clipboard-list"></i>
+        Nuevo Requerimiento
+      </a>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label">
+            <i class="fas fa-search"></i>
+            Buscar
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Número o título..."
+            [ngModel]="searchTerm()"
+            (ngModelChange)="searchTerm.set($event); applyFilters()"
+          />
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">
+            <i class="fas fa-filter"></i>
+            Estado
+          </label>
+          <select class="form-select" [ngModel]="selectedStatus()" (ngModelChange)="selectedStatus.set($event); applyFilters()">
+            <option [ngValue]="null">Todos</option>
+            <option value="PENDING_ASSIGNMENT">Pendiente</option>
+            <option value="IN_PROGRESS">En Proceso</option>
+            <option value="CERTIFICATION">Certificación</option>
+            <option value="CLOSED">Cerrado</option>
+          </select>
+        </div>
+
+        <div class="col-md-5 text-end">
+          <button class="btn btn-primary btn-sm me-2" (click)="applyFilters()">
+            <i class="fas fa-check"></i>
+            Aplicar Filtros
+          </button>
+          <button class="btn btn-secondary btn-sm" (click)="clearFilters()">
+            <i class="fas fa-times"></i>
+            Limpiar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tickets Table -->
+  <div class="card">
+    <div class="card-body">
+      <app-loading-spinner *ngIf="loading()" message="Cargando tickets..."></app-loading-spinner>
+
+      <app-no-data
+        *ngIf="!loading() && tickets().length === 0"
+        title="Sin tickets"
+        message="No hay tickets para mostrar"
+      ></app-no-data>
+
+      <div class="table-responsive" *ngIf="!loading() && tickets().length > 0">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Título</th>
+              <th *ngIf="isAdmin()">Área</th>
+              <th>Estado</th>
+              <th>Prioridad</th>
+              <th>Fecha</th>
+              <th class="text-center">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let ticket of tickets()">
+              <td><strong>{{ ticket.ticketNumber }}</strong></td>
+              <td>
+                <span class="truncate">{{ ticket.title }}</span>
+              </td>
+              <td *ngIf="isAdmin()">
+                {{ ticket.assignedArea?.areaName || '—' }}
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getStatusBadgeClass(ticket.status)">
+                  {{ getStatusLabel(ticket.status) }}
+                </span>
+              </td>
+              <td>
+                <i [ngClass]="'fas fa-' + getPriorityIconClass(ticket.priority)"></i>
+                {{ ticket.priority }}
+              </td>
+              <td class="text-light">{{ ticket.createdDate | date: 'dd/MM/yyyy' }}</td>
+              <td class="text-center">
+                <a
+                  [routerLink]="['/tickets', ticket.ticketId]"
+                  class="btn btn-sm btn-outline-primary"
+                  title="Ver detalles"
+                >
+                  <i class="fas fa-eye"></i>
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-container mt-3" *ngIf="!loading() && totalPages() > 1">
+        <nav>
+          <ul class="pagination justify-content-center">
+            <li class="page-item" [class.disabled]="!hasPreviousPage()">
+              <button
+                class="page-link"
+                (click)="onPageChange(pageNumber() - 1)"
+                [disabled]="!hasPreviousPage()"
+              >
+                <i class="fas fa-chevron-left"></i>
+                Anterior
+              </button>
+            </li>
+
+            <li class="page-item active">
+              <span class="page-link">
+                Página {{ pageNumber() }} de {{ totalPages() }}
+              </span>
+            </li>
+
+            <li class="page-item" [class.disabled]="!hasNextPage()">
+              <button
+                class="page-link"
+                (click)="onPageChange(pageNumber() + 1)"
+                [disabled]="!hasNextPage()"
+              >
+                Siguiente
+                <i class="fas fa-chevron-right"></i>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>

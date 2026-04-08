@@ -1,0 +1,203 @@
+<div class="assign-ticket-container">
+  <app-loading-spinner *ngIf="loading()" message="Cargando información..."></app-loading-spinner>
+
+  <div *ngIf="!loading() && ticket() as t" class="assign-content">
+    <h1 class="page-title">
+      <i class="fas fa-hand-paper"></i>
+      ASIGNAR TICKET
+    </h1>
+    <p class="subtitle">{{ t.ticketNumber }} - {{ t.title }}</p>
+
+    <div class="ticket-info-box mb-4">
+      <div class="info-row">
+        <span class="label">
+          <i class="fas fa-id-badge"></i>
+          Ticket:
+        </span>
+        <strong>{{ t.ticketNumber }}</strong>
+      </div>
+      <div class="info-row">
+        <span class="label">
+          <i class="fas fa-circle-notch"></i>
+          Estado:
+        </span>
+        <span class="badge badge-status-pending">Pendiente de Asignación</span>
+      </div>
+      <div class="info-row">
+        <span class="label">
+          <i class="fas fa-user-tag"></i>
+          Cliente:
+        </span>
+        <strong>{{ t.customerFirstName }} {{ t.customerLastName }}</strong>
+      </div>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <!-- Seleccionar Área -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h2 class="mb-0">
+            <i class="fas fa-building"></i>
+            PASO 1: SELECCIONAR ÁREA
+          </h2>
+        </div>
+        <div class="card-body">
+          <label for="area" class="form-label">
+            <i class="fas fa-map-marker-alt"></i>
+            Área Responsable
+          </label>
+          <select
+            id="area"
+            formControlName="areaId"
+            class="form-select"
+            [class.is-invalid]="form.get('areaId')?.invalid && form.get('areaId')?.touched"
+          >
+            <option value="">-- Seleccionar Área --</option>
+            <option *ngFor="let area of allAreas()" [value]="area.areaId">
+              {{ area.areaName }} (Jefe: {{ area.jefe.firstName }})
+            </option>
+          </select>
+          <div class="invalid-feedback d-block" *ngIf="areaError">
+            {{ areaError }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Seleccionar Desarrollador -->
+      <div class="card mb-4" *ngIf="selectedAreaMembers().length > 0">
+        <div class="card-header">
+          <h2 class="mb-0">
+            <i class="fas fa-user-check"></i>
+            PASO 2: SELECCIONAR RESPONSABLE
+          </h2>
+        </div>
+        <div class="card-body">
+          <div *ngIf="selectedAreaMembers().length === 0" class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            Selecciona un área primero para ver los miembros disponibles
+          </div>
+
+          <div class="developers-grid" *ngIf="selectedAreaMembers().length > 0">
+            <div *ngFor="let dev of selectedAreaMembers()" class="developer-option">
+              <input
+                type="radio"
+                [value]="dev.userId"
+                formControlName="developerId"
+                [id]="'dev-' + dev.userId"
+              />
+              <label [for]="'dev-' + dev.userId" class="developer-label">
+                <div class="developer-info">
+                  <strong>
+                    <i class="fas fa-user-circle"></i>
+                    {{ dev.fullName }}
+                  </strong>
+                  <p>{{ dev.email }}</p>
+                </div>
+                <div class="developer-workload">
+                  <span class="badge bg-info">
+                    <i class="fas fa-tasks"></i>
+                    {{ getMemberWorkload(dev.userId) }} tickets
+                  </span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="invalid-feedback d-block" *ngIf="developerError && form.get('developerId')?.touched">
+            {{ developerError }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Seleccionar Prioridad -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h2 class="mb-0">
+            <i class="fas fa-flag"></i>
+            PASO 3: ESTABLECER PRIORIDAD
+          </h2>
+        </div>
+        <div class="card-body">
+          <label class="form-label">Nivel de Prioridad</label>
+          <div class="priority-selector">
+            <div *ngFor="let priority of priorityOptions" class="priority-option">
+              <input
+                type="radio"
+                [value]="priority.value"
+                formControlName="priority"
+                [id]="'priority-' + priority.value"
+              />
+              <label [for]="'priority-' + priority.value" class="priority-label">
+                <i [ngClass]="'fas ' + priority.icon"></i>
+                <span>{{ priority.label }}</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="invalid-feedback d-block" *ngIf="priorityError && form.get('priority')?.touched">
+            {{ priorityError }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Resumen -->
+      <div class="card mb-4" *ngIf="form.get('areaId')?.value && form.get('developerId')?.value">
+        <div class="card-header">
+          <h2 class="mb-0">
+            <i class="fas fa-check-circle"></i>
+            RESUMEN DE ASIGNACIÓN
+          </h2>
+        </div>
+        <div class="card-body">
+          <div class="summary-item">
+            <span class="label">
+              <i class="fas fa-building"></i>
+              Área:
+            </span>
+            <strong>
+              {{ selectedAreaName }}
+            </strong>
+          </div>
+          <div class="summary-item">
+            <span class="label">
+              <i class="fas fa-user-check"></i>
+              Responsable:
+            </span>
+            <strong>
+              {{ selectedDeveloperName }}
+            </strong>
+          </div>
+          <div class="summary-item">
+            <span class="label">
+              <i class="fas fa-flag"></i>
+              Prioridad:
+            </span>
+            <strong>
+              <i [ngClass]="'fas ' + getPriorityIcon(form.get('priority')?.value)"></i>
+              {{ form.get('priority')?.value }}
+            </strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="submit"
+          class="btn btn-primary btn-lg"
+          [disabled]="form.invalid || submitting()"
+        >
+          <i class="fas fa-save"></i>
+          <span *ngIf="!submitting()">CONFIRMAR ASIGNACIÓN</span>
+          <span *ngIf="submitting()">
+            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            Asignando...
+          </span>
+        </button>
+        <a [routerLink]="['/tickets', t.ticketId]" class="btn btn-secondary btn-lg">
+          <i class="fas fa-times"></i>
+          CANCELAR
+        </a>
+      </div>
+    </form>
+  </div>
+</div>

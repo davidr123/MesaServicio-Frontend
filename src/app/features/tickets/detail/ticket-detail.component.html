@@ -1,0 +1,391 @@
+<div class="ticket-detail-container">
+  <app-loading-spinner *ngIf="loading()" message="Cargando detalles..."></app-loading-spinner>
+
+  <div *ngIf="!loading() && ticket() as t" class="ticket-content">
+    <div class="ticket-header mb-4">
+      <div>
+        <h1 class="ticket-number">{{ t.ticketNumber }}</h1>
+        <p class="ticket-title">{{ t.title }}</p>
+      </div>
+      <div class="ticket-actions">
+        <a routerLink="/tickets" class="btn btn-secondary">
+          <i class="fas fa-arrow-left"></i>
+          Volver
+        </a>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="card mb-4">
+          <div class="card-header">
+            <h2 class="mb-0">
+              <i class="fas fa-info-circle"></i>
+              INFORMACIÓN
+            </h2>
+          </div>
+          <div class="card-body">
+            <div class="info-grid">
+              <div class="info-item">
+                <label>
+                  <i class="fas fa-circle-notch"></i>
+                  Estado
+                </label>
+                <span class="badge" [ngClass]="getStatusBadgeClass(t.status)">
+                  {{ getStatusLabel(t.status) }}
+                </span>
+              </div>
+              <div class="info-item">
+                <label>
+                  <i class="fas fa-flag"></i>
+                  Prioridad
+                </label>
+                <span>
+                  <i [ngClass]="'fas ' + getPriorityIcon(t.priority)"></i>
+                  {{ t.priority }}
+                </span>
+              </div>
+              <div class="info-item">
+                <label>
+                  <i class="fas fa-tag"></i>
+                  Tipo
+                </label>
+                <span>{{ t.ticketType }}</span>
+              </div>
+              <div class="info-item">
+                <label>
+                  <i class="fas fa-calendar"></i>
+                  Fecha Creación
+                </label>
+                <span>{{ t.createdDate | date: 'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <div class="info-item">
+                <label>
+                  <i class="fas fa-building"></i>
+                  Área Asignada
+                </label>
+                <span>{{ t.assignedArea?.areaName || '—' }}</span>
+              </div>
+              <div class="info-item">
+                <label>
+                  <i class="fas fa-user-check"></i>
+                  Asignado a
+                </label>
+                <span>{{ t.assignedTo?.fullName || '—' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-header">
+            <h2 class="mb-0">
+              <i class="fas fa-file-alt"></i>
+              DESCRIPCIÓN
+            </h2>
+          </div>
+          <div class="card-body">
+            <p>{{ t.description }}</p>
+          </div>
+        </div>
+
+
+        <!-- buton asignacion -->
+<!-- Botón Asignar (Solo ADMIN) -->
+<div class="card mb-4" *ngIf="currentUserRole() === 'ADMIN' && t.status === 'PENDING_ASSIGNMENT'">
+  <div class="card-body">
+    <a
+      [routerLink]="['/tickets', t.ticketId, 'assign']"
+      class="btn btn-success btn-lg w-100"
+    >
+      <i class="fas fa-hand-paper"></i>
+      ASIGNAR ESTE TICKET
+    </a>
+  </div>
+</div>
+
+<!-- Botón Reasignar (Solo DEVELOPER si está asignado a él) -->
+<div class="card mb-4" *ngIf="currentUserRole() === 'DEVELOPER' && t.status === 'IN_PROGRESS'">
+  <div class="card-body">
+    <a
+      [routerLink]="['/tickets', t.ticketId, 'reassign']"
+      class="btn btn-warning btn-lg w-100"
+    >
+      <i class="fas fa-exchange-alt"></i>
+      REASIGNAR TICKET
+    </a>
+  </div>
+</div>
+
+
+        <!-- Comentarios Públicos -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h2 class="mb-0">
+              <i class="fas fa-comments"></i>
+              COMENTARIOS PÚBLICOS ({{ getPublicComments().length }})
+            </h2>
+          </div>
+          <div class="card-body">
+            <div *ngIf="getPublicComments().length === 0" class="text-center text-light py-4">
+              <i class="fas fa-inbox"></i>
+              No hay comentarios públicos
+            </div>
+            <div *ngFor="let comment of getPublicComments()" class="comment-item mb-3">
+              <div class="comment-header d-flex justify-content-between align-items-start">
+                <div>
+                  <strong>{{ comment.createdBy.fullName }}</strong>
+                  <small class="text-light d-block">
+                    <i class="fas fa-clock"></i>
+                    {{ comment.createdDate | date: 'dd/MM/yyyy HH:mm' }}
+                  </small>
+                </div>
+                <span class="badge" [ngClass]="getCommentTypeBadgeClass(comment.commentType)">
+                  {{ getCommentTypeLabel(comment.commentType) }}
+                </span>
+              </div>
+              <p class="comment-text mt-2">{{ comment.text }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comentarios Internos (Solo para ADMIN y DEVELOPER) -->
+        <div class="card mb-4" *ngIf="canSeeInternalComments()">
+          <div class="card-header">
+            <button
+              class="btn btn-link p-0"
+              (click)="showInternalComments.set(!showInternalComments())"
+            >
+              <i [ngClass]="showInternalComments() ? 'fas fa-chevron-down' : 'fas fa-chevron-right'"></i>
+              COMENTARIOS INTERNOS ({{ getInternalComments().length }})
+              <span class="badge bg-warning ms-2">SOLO EQUIPO</span>
+            </button>
+          </div>
+          <div class="card-body" *ngIf="showInternalComments()">
+            <div *ngIf="getInternalComments().length === 0" class="text-center text-light py-4">
+              <i class="fas fa-inbox"></i>
+              No hay comentarios internos
+            </div>
+            <div *ngFor="let comment of getInternalComments()" class="comment-item-internal mb-3">
+              <div class="comment-header d-flex justify-content-between align-items-start">
+                <div>
+                  <strong>{{ comment.createdBy.fullName }}</strong>
+                  <small class="text-light d-block">
+                    <i class="fas fa-clock"></i>
+                    {{ comment.createdDate | date: 'dd/MM/yyyy HH:mm' }}
+                  </small>
+                </div>
+                <span class="badge" [ngClass]="getCommentTypeBadgeClass(comment.commentType)">
+                  {{ getCommentTypeLabel(comment.commentType) }}
+                </span>
+              </div>
+              <p class="comment-text mt-2">{{ comment.text }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Agregar Comentario (Solo ADMIN y DEVELOPER) -->
+        <div class="card" *ngIf="canAddComments()">
+          <div class="card-header">
+            <h2 class="mb-0">
+              <i class="fas fa-plus-circle"></i>
+              AGREGAR COMENTARIO
+            </h2>
+          </div>
+          <div class="card-body">
+            <form [formGroup]="commentForm" (ngSubmit)="onAddComment()">
+              <div class="mb-3">
+                <label for="comment-type" class="form-label">
+                  <i class="fas fa-tag"></i>
+                  Tipo de Comentario
+                </label>
+                <select
+                  id="comment-type"
+                  formControlName="commentType"
+                  class="form-select">
+                  <option [value]="'PUBLIC_ACTION'">Acción Publicada (notifica al usuario)</option>
+                  <option [value]="'QUESTION_TO_USER'">Pregunta al Usuario (requiere respuesta)</option>
+                  <option [value]="'INTERNAL_ACTION'">Acción Interna (solo el equipo ve)</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="comment-text" class="form-label">Tu comentario</label>
+                <textarea
+                  id="comment-text"
+                  formControlName="text"
+                  class="form-control"
+                  placeholder="Escribe tu comentario aquí..."
+                  rows="3"
+                  [class.is-invalid]="commentForm.get('text')?.invalid && commentForm.get('text')?.touched"
+                ></textarea>
+                <div class="invalid-feedback d-block" *ngIf="commentTextError">
+                  {{ commentTextError }}
+                </div>
+              </div>
+
+              <div class="mb-3 form-check" *ngIf="commentForm.get('commentType')?.value !== 'INTERNAL_ACTION'">
+                <input
+                  type="checkbox"
+                  id="is-internal"
+                  formControlName="isInternal"
+                  class="form-check-input"
+                />
+                <label class="form-check-label" for="is-internal">
+                  <i class="fas fa-lock"></i>
+                  Marcar como interno (solo visible para el equipo)
+                </label>
+              </div>
+
+              <div class="mb-3">
+                <label for="attachment-file" class="form-label">
+                  <i class="fas fa-paperclip"></i>
+                  Adjuntar Archivo (Opcional)
+                </label>
+                <input
+                  type="file"
+                  id="attachment-file"
+                  #fileInput
+                  class="form-control"
+                  (change)="onFileSelected($event)"
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx"
+                />
+                <small class="text-muted d-block mt-1">
+                  Formatos permitidos: PDF, DOC, DOCX, JPG, JPEG, PNG, XLS, XLSX (máx. 5 MB)
+                </small>
+                <div *ngIf="selectedFile()" class="mt-2 alert alert-info">
+                  <i class="fas fa-check-circle"></i>
+                  Archivo seleccionado: {{ selectedFile()?.name }} ({{ formatFileSize(selectedFile()?.size ?? 0) }})
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button
+                  type="submit"
+                  class="btn btn-primary btn-sm"
+                  [disabled]="commentForm.invalid || commentLoading()"
+                >
+                  <i class="fas fa-paper-plane"></i>
+                  <span *ngIf="!commentLoading()">ENVIAR COMENTARIO</span>
+                  <span *ngIf="commentLoading()">
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    Enviando...
+                  </span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Attachments Section -->
+      <div class="card mb-4">
+        <div class="card-header bg-light d-flex align-items-center">
+          <i class="fas fa-paperclip me-2"></i>
+          <strong>Adjuntos ({{ticket()?.attachmentCount ?? 0}})</strong>
+        </div>
+        <div class="card-body">
+          <div *ngIf="hasAttachments(); else noAttachments" class="list-group list-group-flush">
+            <a *ngFor="let file of ticket()?.attachments ?? []"
+               href="javascript:void(0)"
+               class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2">
+              <div class="d-flex align-items-center">
+                <small class="text-muted">📄 {{file.fileName}}</small>
+              </div>
+              <div class="d-flex align-items-center">
+                <small class="me-2 text-muted">{{formatFileSize(file.fileSize ?? 0)}}</small>
+                <button class="btn btn-sm btn-outline-primary" title="Descargar">
+                  <i class="fas fa-download"></i>
+                </button>
+              </div>
+            </a>
+          </div>
+          <ng-template #noAttachments>
+            <p class="text-muted small mb-0">Sin adjuntos</p>
+          </ng-template>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <!-- Cliente Info -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h2 class="mb-0">
+              <i class="fas fa-user-tag"></i>
+              CLIENTE
+            </h2>
+          </div>
+          <div class="card-body">
+            <div class="info-item mb-3">
+              <label>
+                <i class="fas fa-id-card"></i>
+                Cédula
+              </label>
+              <span>{{ t.customerCedula }}</span>
+            </div>
+            <div class="info-item mb-3">
+              <label>
+                <i class="fas fa-person"></i>
+                Nombre Completo
+              </label>
+              <span>{{ t.customerFirstName }} {{ t.customerLastName }}</span>
+            </div>
+            <div class="info-item">
+              <label>
+                <i class="fas fa-building"></i>
+                Número de Entidad
+              </label>
+              <span>{{ t.customerEntityNumber }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Archivos -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h2 class="mb-0">
+              <i class="fas fa-paperclip"></i>
+              ARCHIVOS ({{ t.attachmentCount }})
+            </h2>
+          </div>
+          <div class="card-body">
+            <div *ngIf="t.attachmentCount === 0" class="text-center text-light py-4">
+              <i class="fas fa-inbox"></i>
+              No hay archivos
+            </div>
+            <div *ngFor="let attachment of t.attachments" class="attachment-item mb-2">
+              <a href="#" class="text-decoration-none">
+                <i class="fas fa-file"></i>
+                {{ attachment.fileName }}
+              </a>
+              <small class="d-block text-light">{{ (attachment.fileSize / 1024).toFixed(2) }} KB</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tiempo Registrado -->
+        <div class="card">
+          <div class="card-header">
+            <h2 class="mb-0">
+              <i class="fas fa-hourglass-end"></i>
+              TIEMPO REGISTRADO
+            </h2>
+          </div>
+          <div class="card-body">
+            <div *ngIf="t.timeEntries.length === 0" class="text-center text-light py-4">
+              <i class="fas fa-inbox"></i>
+              Sin registros
+            </div>
+            <div *ngFor="let entry of t.timeEntries" class="time-entry mb-2 pb-2 border-bottom">
+              <div class="d-flex justify-content-between">
+                <strong>{{ entry.user.firstName }}</strong>
+                <span>{{ entry.hoursSpent }}h</span>
+              </div>
+              <small class="text-light">{{ entry.taskDescription }}</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

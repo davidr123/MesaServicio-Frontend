@@ -1,0 +1,32 @@
+<header class="header">
+  <div class="header-left">
+    <button class="btn-toggle" (click)="onToggleSidebar()" title="Toggle sidebar">
+      <span class="icon">☰</span>
+    </button>
+    <h1 class="header-title">
+      <app-icon name="briefcase"></app-icon>
+      SERVICE DESK
+      </h1>
+  </div>
+
+  <div class="header-right">
+    <div class="notification-badge">
+      <app-icon name="bell"></app-icon>
+      <span class="badge bg-danger">3</span>
+    </div>
+
+    <div class="user-menu">
+      <button class="user-button" (click)="toggleDropdown()">
+        <span class="user-avatar">  <app-icon name="user-circle"></app-icon></span>
+        <span *ngIf="currentUser" class="user-name">{{ currentUser.firstName }}</span>
+      </button>
+
+      <div class="dropdown-menu" [class.show]="dropdownOpen">
+        <a href="#" class="dropdown-item"> <app-icon name="user"></app-icon> Mi Perfil</a>
+        <a href="#" class="dropdown-item"><app-icon name="gear"></app-icon> Configuración</a>
+        <div class="dropdown-divider"></div>
+        <button class="dropdown-item logout" (click)="logout()"> <app-icon name="sign-out-alt"></app-icon> Cerrar Sesión</button>
+      </div>
+    </div>
+  </div>
+</header>

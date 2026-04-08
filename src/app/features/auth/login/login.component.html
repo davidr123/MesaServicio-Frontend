@@ -1,0 +1,56 @@
+<div class="login-container">
+  <div class="login-box">
+    <div class="login-header">
+      <h1 class="mb-1">🏢 SERVICE DESK</h1>
+      <p class="text-secondary">Gestión de Tickets Bancaria</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          class="form-control"
+          placeholder="tu@email.com"
+          [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched"
+        />
+        <div class="invalid-feedback d-block" *ngIf="emailError">
+          {{ emailError }}
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">Contraseña</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          class="form-control"
+          placeholder="••••••••"
+          [class.is-invalid]="form.get('password')?.invalid && form.get('password')?.touched"
+        />
+        <div class="invalid-feedback d-block" *ngIf="passwordError">
+          {{ passwordError }}
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary w-100 mb-3"
+        [disabled]="form.invalid || loading"
+      >
+        <span *ngIf="!loading">INICIAR SESIÓN</span>
+        <span *ngIf="loading">
+          <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          Iniciando...
+        </span>
+      </button>
+    </form>
+
+    <div class="login-footer text-center mt-3">
+      <a href="#" class="text-decoration-none text-primary">¿Olvidó su contraseña?</a>
+    </div>
+  </div>
+</div>

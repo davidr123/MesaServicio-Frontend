@@ -1,0 +1,69 @@
+.create-requirement-container {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.page-title {
+  font-size: 28px;
+  color: #1a1a1a;
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+
+.subtitle {
+  color: #999;
+  font-size: 14px;
+  margin: 0 0 24px;
+}
+
+.info-box {
+  background: #f3e5f5;
+  padding: 16px;
+  border-left: 4px solid #9c27b0;
+  border-radius: 4px;
+}
+
+.info-box p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #6a1b9a;
+}
+
+.info-box strong {
+  color: #4a148c;
+}
+
+.invalid-feedback {
+  color: #f44336;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.is-invalid {
+  border-color: #f44336 !important;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.form-actions .btn {
+  min-width: 150px;
+}
+
+@media (max-width: 768px) {
+  .create-requirement-container {
+    margin: 0;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+  }
+}

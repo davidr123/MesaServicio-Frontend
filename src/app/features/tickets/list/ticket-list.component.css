@@ -1,0 +1,77 @@
+.ticket-list-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.page-title {
+  font-size: 28px;
+  color: #1a1a1a;
+  margin: 0;
+  font-weight: 600;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.truncate {
+  display: inline-block;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.priority-badge {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.priority-low {
+  color: #4caf50;
+}
+
+.priority-medium {
+  color: #ff9800;
+}
+
+.priority-high {
+  color: #f57c00;
+}
+
+.priority-critical {
+  color: #f44336;
+}
+
+.pagination-container {
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .header-actions a {
+    width: 100%;
+    text-align: center;
+  }
+
+  .truncate {
+    max-width: 150px;
+  }
+}

@@ -1,0 +1,21 @@
+ .no-data-container {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+
+    .icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    h3 {
+      margin: 0 0 8px;
+      color: #666;
+      font-size: 18px;
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+    }

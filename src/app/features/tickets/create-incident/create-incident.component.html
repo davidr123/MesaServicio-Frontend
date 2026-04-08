@@ -1,0 +1,152 @@
+<div class="create-incident-container">
+  <h1 class="page-title">
+    <i class="fas fa-exclamation-triangle"></i>
+    CREAR NUEVO INCIDENTE
+  </h1>
+  <p class="subtitle">(Sistema automáticamente lo enviará a Tecnología)</p>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="card mb-4">
+      <div class="card-header">
+        <h2 class="mb-0">
+          <i class="fas fa-user-check"></i>
+          DATOS DEL CLIENTE AFECTADO
+        </h2>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="cedula" class="form-label">
+              <i class="fas fa-id-card"></i>
+              Cédula del Cliente
+            </label>
+            <input
+              id="cedula"
+              type="text"
+              formControlName="customerCedula"
+              class="form-control"
+              placeholder="Ej: 12345678"
+              [class.is-invalid]="form.get('customerCedula')?.invalid && form.get('customerCedula')?.touched"
+            />
+            <div class="invalid-feedback d-block" *ngIf="cedulaError">
+              {{ cedulaError }}
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="entity" class="form-label">
+              <i class="fas fa-building"></i>
+              Número de Entidad
+            </label>
+            <input
+              id="entity"
+              type="text"
+              formControlName="customerEntityNumber"
+              class="form-control"
+              placeholder="Ej: ENT-001"
+              [class.is-invalid]="form.get('customerEntityNumber')?.invalid && form.get('customerEntityNumber')?.touched"
+            />
+            <div class="invalid-feedback d-block" *ngIf="entityNumberError">
+              {{ entityNumberError }}
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="firstName" class="form-label">
+              <i class="fas fa-person"></i>
+              Nombre
+            </label>
+            <input
+              id="firstName"
+              type="text"
+              formControlName="customerFirstName"
+              class="form-control"
+              placeholder="Ej: Juan"
+              [class.is-invalid]="form.get('customerFirstName')?.invalid && form.get('customerFirstName')?.touched"
+            />
+            <div class="invalid-feedback d-block" *ngIf="firstNameError">
+              {{ firstNameError }}
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="lastName" class="form-label">
+              <i class="fas fa-person"></i>
+              Apellido
+            </label>
+            <input
+              id="lastName"
+              type="text"
+              formControlName="customerLastName"
+              class="form-control"
+              placeholder="Ej: Pérez"
+              [class.is-invalid]="form.get('customerLastName')?.invalid && form.get('customerLastName')?.touched"
+            />
+            <div class="invalid-feedback d-block" *ngIf="lastNameError">
+              {{ lastNameError }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header">
+        <h2 class="mb-0">
+          <i class="fas fa-file-alt"></i>
+          DESCRIPCIÓN DEL INCIDENTE
+        </h2>
+      </div>
+      <div class="card-body">
+        <label for="description" class="form-label">Describa el problema en detalle</label>
+        <textarea
+          id="description"
+          formControlName="description"
+          class="form-control"
+          placeholder="Describa el problema de forma detallada..."
+          rows="5"
+          [class.is-invalid]="form.get('description')?.invalid && form.get('description')?.touched"
+        ></textarea>
+        <small class="d-block mt-2 text-light">
+          <i class="fas fa-info-circle"></i>
+          Caracteres: {{ form.get('description')?.value?.length || 0 }}/500
+        </small>
+        <div class="invalid-feedback d-block" *ngIf="descriptionError">
+          {{ descriptionError }}
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box mb-4">
+      <p>
+        <i class="fas fa-check"></i>
+        Auto-asignado a: <strong>TECNOLOGÍA</strong>
+      </p>
+      <p>
+        <i class="fas fa-clock"></i>
+        Estado: <strong>PENDIENTE (Espera asignación)</strong>
+      </p>
+      <p class="mb-0">
+        <i class="fas fa-flag"></i>
+        Prioridad: <strong>Se definirá al revisar</strong>
+      </p>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" [disabled]="form.invalid || loading">
+        <i class="fas fa-save"></i>
+        <span *ngIf="!loading">CREAR INCIDENTE</span>
+        <span *ngIf="loading">
+          <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          Creando...
+        </span>
+      </button>
+      <a routerLink="/dashboard" class="btn btn-secondary">
+        <i class="fas fa-times"></i>
+        CANCELAR
+      </a>
+    </div>
+  </form>
+</div>

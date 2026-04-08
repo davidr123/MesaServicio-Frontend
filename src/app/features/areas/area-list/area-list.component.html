@@ -1,0 +1,64 @@
+<div class="areas-container">
+  <h1 class="page-title">
+    <i class="fas fa-building"></i>
+    Áreas
+  </h1>
+
+  <app-loading-spinner *ngIf="loading()" message="Cargando áreas..."></app-loading-spinner>
+
+  <app-no-data
+    *ngIf="!loading() && areas().length === 0"
+    title="Sin áreas"
+    message="No hay áreas registradas en el sistema"
+  ></app-no-data>
+
+  <div class="row" *ngIf="!loading() && areas().length > 0">
+    <div class="col-md-6 col-lg-4 mb-4" *ngFor="let area of areas()">
+      <div class="area-card" [class.active]="selectedAreaId() === area.areaId">
+
+        <div class="area-card-header">
+          <span class="area-code-badge">{{ area.areaCode }}</span>
+          <h3 class="area-name">{{ area.areaName }}</h3>
+        </div>
+
+        <div class="area-card-body">
+          <div class="area-info" *ngIf="area.jefe">
+            <i class="fas fa-user-tie"></i>
+            <span>{{ area.jefe.fullName }}</span>
+          </div>
+          <div class="area-info">
+            <i class="fas fa-users"></i>
+            <span>{{ area.members?.length ?? 0 }} miembros</span>
+          </div>
+        </div>
+
+        <div class="area-card-footer">
+          <button class="btn-members" (click)="toggleMembers(area.areaId)">
+            <i class="fas"
+              [class.fa-chevron-down]="selectedAreaId() !== area.areaId"
+              [class.fa-chevron-up]="selectedAreaId() === area.areaId">
+            </i>
+            {{ selectedAreaId() === area.areaId ? 'Ocultar miembros' : 'Ver miembros' }}
+          </button>
+        </div>
+
+        <div class="members-panel" *ngIf="selectedAreaId() === area.areaId">
+          <app-loading-spinner *ngIf="loadingMembers()" message="Cargando..."></app-loading-spinner>
+
+          <div class="member-item" *ngFor="let member of areaMembers()">
+            <div class="member-avatar">{{ member.firstName[0] }}{{ member.lastName[0] }}</div>
+            <div class="member-info">
+              <div class="member-name">{{ member.fullName }}</div>
+              <div class="member-role">{{ getRoleLabel(member.role) }}</div>
+            </div>
+          </div>
+
+          <div class="no-members" *ngIf="!loadingMembers() && areaMembers().length === 0">
+            Sin miembros registrados
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

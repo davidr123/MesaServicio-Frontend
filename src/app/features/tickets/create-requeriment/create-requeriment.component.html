@@ -1,0 +1,78 @@
+<div class="create-requirement-container">
+  <h1 class="page-title">📝 CREAR NUEVO REQUERIMIENTO</h1>
+  <p class="subtitle">(Sistema automáticamente lo enviará a Tecnología)</p>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="card mb-4">
+      <div class="card-header">
+        <h2 class="mb-0">📋 INFORMACIÓN DEL REQUERIMIENTO</h2>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <label for="title" class="form-label">Título</label>
+          <input
+            id="title"
+            type="text"
+            formControlName="title"
+            class="form-control"
+            placeholder="Ej: Nuevo módulo de reportes"
+            [class.is-invalid]="form.get('title')?.invalid && form.get('title')?.touched"
+          />
+          <div class="invalid-feedback d-block" *ngIf="titleError">
+            {{ titleError }}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="product" class="form-label">Producto Afectado</label>
+          <input
+            id="product"
+            type="text"
+            formControlName="productName"
+            class="form-control"
+            placeholder="Ej: Sistema de Login"
+            [class.is-invalid]="form.get('productName')?.invalid && form.get('productName')?.touched"
+          />
+          <div class="invalid-feedback d-block" *ngIf="productNameError">
+            {{ productNameError }}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="description" class="form-label">Descripción del Requerimiento</label>
+          <textarea
+            id="description"
+            formControlName="description"
+            class="form-control"
+            placeholder="Describa el requerimiento de forma detallada..."
+            rows="6"
+            [class.is-invalid]="form.get('description')?.invalid && form.get('description')?.touched"
+          ></textarea>
+          <small class="d-block mt-2 text-light">
+            Caracteres: {{ form.get('description')?.value?.length || 0 }}/1000
+          </small>
+          <div class="invalid-feedback d-block" *ngIf="descriptionError">
+            {{ descriptionError }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box mb-4">
+      <p>✓ Auto-asignado a: <strong>TECNOLOGÍA</strong></p>
+      <p>✓ Tipo: <strong>CAMBIO/REQUERIMIENTO</strong></p>
+      <p class="mb-0">✓ Estado: <strong>PENDIENTE (Espera asignación)</strong></p>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" [disabled]="form.invalid || loading">
+        <span *ngIf="!loading">CREAR REQUERIMIENTO</span>
+        <span *ngIf="loading">
+          <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          Creando...
+        </span>
+      </button>
+      <a routerLink="/dashboard" class="btn btn-secondary">CANCELAR</a>
+    </div>
+  </form>
+</div>
