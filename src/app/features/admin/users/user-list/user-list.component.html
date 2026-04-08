@@ -1,1 +1,136 @@
-<p>user-list.component works!</p>
+<div class="users-container">
+  <div class="page-header mb-4">
+    <h1 class="page-title">
+      <i class="fas fa-users"></i>
+      Usuarios
+    </h1>
+    <button class="btn btn-primary btn-sm" (click)="toggleForm()">
+      <i class="fas" [class.fa-plus]="!showForm()" [class.fa-times]="showForm()"></i>
+      {{ showForm() ? 'Cancelar' : 'Nuevo Usuario' }}
+    </button>
+  </div>
+
+  <!-- Create User Form -->
+  <div class="card mb-4" *ngIf="showForm()">
+    <div class="card-header">
+      <i class="fas fa-user-plus me-2"></i>
+      Crear Nuevo Usuario
+    </div>
+    <div class="card-body">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Nombre</label>
+            <input
+              type="text"
+              formControlName="firstName"
+              class="form-control"
+              placeholder="Juan"
+              [class.is-invalid]="form.get('firstName')?.invalid && form.get('firstName')?.touched"
+            />
+            <div class="invalid-feedback" *ngIf="firstNameError">{{ firstNameError }}</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Apellido</label>
+            <input
+              type="text"
+              formControlName="lastName"
+              class="form-control"
+              placeholder="Pérez"
+              [class.is-invalid]="form.get('lastName')?.invalid && form.get('lastName')?.touched"
+            />
+            <div class="invalid-feedback" *ngIf="lastNameError">{{ lastNameError }}</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Email</label>
+            <input
+              type="email"
+              formControlName="email"
+              class="form-control"
+              placeholder="juan@example.com"
+              [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched"
+            />
+            <div class="invalid-feedback" *ngIf="emailError">{{ emailError }}</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Contraseña</label>
+            <input
+              type="password"
+              formControlName="password"
+              class="form-control"
+              placeholder="••••••••"
+              [class.is-invalid]="form.get('password')?.invalid && form.get('password')?.touched"
+            />
+            <div class="invalid-feedback" *ngIf="passwordError">{{ passwordError }}</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Área (opcional)</label>
+            <select formControlName="areaId" class="form-select">
+              <option [ngValue]="null">Sin área</option>
+              <option *ngFor="let area of areas()" [value]="area.areaId">{{ area.areaName }}</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <button type="submit" class="btn btn-primary me-2" [disabled]="form.invalid || submitting()">
+              <span *ngIf="submitting()">
+                <span class="spinner-border spinner-border-sm me-1"></span>
+                Guardando...
+              </span>
+              <span *ngIf="!submitting()">
+                <i class="fas fa-save me-1"></i>
+                Guardar
+              </span>
+            </button>
+            <button type="button" class="btn btn-secondary" (click)="toggleForm()">Cancelar</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Users Table -->
+  <div class="card">
+    <div class="card-body">
+      <app-loading-spinner *ngIf="loading()" message="Cargando usuarios..."></app-loading-spinner>
+
+      <app-no-data
+        *ngIf="!loading() && users().length === 0"
+        title="Sin usuarios"
+        message="No hay usuarios registrados en el sistema"
+      ></app-no-data>
+
+      <div class="table-responsive" *ngIf="!loading() && users().length > 0">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Área</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users(); let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="user-avatar-sm">{{ user.firstName[0] }}{{ user.lastName[0] }}</div>
+                  <span>{{ user.firstName }} {{ user.lastName }}</span>
+                </div>
+              </td>
+              <td>{{ user.email }}</td>
+              <td>
+                <span class="badge" [ngClass]="getRoleBadgeClass(user.role)">
+                  {{ getRoleLabel(user.role) }}
+                </span>
+              </td>
+              <td>{{ getAreaName(user.areaId) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+

@@ -1,1 +1,105 @@
-<p>dashboard-team.component works!</p>
+<div class="dashboard-container">
+  <div class="page-header mb-4">
+    <div>
+      <h1 class="page-title">
+        <i class="fas fa-tachometer-alt"></i>
+        Dashboard del Equipo
+      </h1>
+      <div class="text-secondary mt-1" *ngIf="currentArea()">
+        <i class="fas fa-building me-1"></i>{{ currentArea()?.areaName }}
+      </div>
+    </div>
+    <a routerLink="/team" class="btn btn-outline-primary btn-sm">
+      <i class="fas fa-users me-1"></i>
+      Ver Equipo
+    </a>
+  </div>
+
+  <!-- Stats -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-6 col-lg-3">
+      <div class="stat-card stat-card-pending">
+        <div class="stat-icon"><i class="fas fa-clock"></i></div>
+        <div class="stat-info">
+          <div class="stat-value">{{ stats().pending }}</div>
+          <div class="stat-label">Pendientes</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="stat-card stat-card-progress">
+        <div class="stat-icon"><i class="fas fa-spinner"></i></div>
+        <div class="stat-info">
+          <div class="stat-value">{{ stats().inProgress }}</div>
+          <div class="stat-label">En Proceso</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="stat-card stat-card-cert">
+        <div class="stat-icon"><i class="fas fa-certificate"></i></div>
+        <div class="stat-info">
+          <div class="stat-value">{{ stats().certification }}</div>
+          <div class="stat-label">Certificación</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+      <div class="stat-card stat-card-closed">
+        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+        <div class="stat-info">
+          <div class="stat-value">{{ stats().closed }}</div>
+          <div class="stat-label">Cerrados</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team Tickets -->
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span><i class="fas fa-list me-2"></i>Tickets del Área</span>
+      <a routerLink="/tickets" class="btn btn-outline-primary btn-sm">Ver todos</a>
+    </div>
+    <div class="card-body">
+      <app-loading-spinner *ngIf="loading()" message="Cargando tickets..."></app-loading-spinner>
+
+      <div class="table-responsive" *ngIf="!loading() && teamTickets().length > 0">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Título</th>
+              <th>Asignado a</th>
+              <th>Estado</th>
+              <th>Prioridad</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let ticket of teamTickets()">
+              <td><a [routerLink]="['/tickets', ticket.ticketId]"><strong>{{ ticket.ticketNumber }}</strong></a></td>
+              <td><span class="truncate">{{ ticket.title }}</span></td>
+              <td>{{ ticket.assignedTo?.fullName ?? '—' }}</td>
+              <td>
+                <span class="badge" [ngClass]="getStatusBadgeClass(ticket.status)">
+                  {{ getStatusLabel(ticket.status) }}
+                </span>
+              </td>
+              <td>
+                <i [ngClass]="'fas fa-' + getPriorityIcon(ticket.priority)"></i>
+              </td>
+              <td class="text-secondary">{{ ticket.createdDate | date: 'dd/MM/yyyy' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="text-center text-secondary py-4" *ngIf="!loading() && teamTickets().length === 0">
+        <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+        No hay tickets asignados al equipo
+      </div>
+    </div>
+  </div>
+</div>
+
