@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { environment } from '../../../enviroments/enviroment.prod';
+import { environment } from '../../../enviroments/enviroment';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { LoginRequest, LoginResponse, User } from '../models/user.model';
 import { UserRole } from '../models/ticket.model';

@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
 
@@ -11,12 +12,27 @@ export const routes: Routes = [
     path: '',
     loadComponent: () =>
       import('./features/layout/layout.component').then((m) => m.LayoutComponent),
+    canActivate: [authGuard],
     children: [
       {
         path: 'dashboard',
         loadComponent: () =>
           import('./features/dashboard/dashboard-user/dashboard-user.component').then(
             (m) => m.DashboardUserComponent
+          )
+      },
+      {
+        path: 'dashboard/admin',
+        loadComponent: () =>
+          import('./features/dashboard/dashboard-admin/dashboard-admin.component').then(
+            (m) => m.DashboardAdminComponent
+          )
+      },
+      {
+        path: 'dashboard/team',
+        loadComponent: () =>
+          import('./features/dashboard/dashboard-team/dashboard-team.component').then(
+            (m) => m.DashboardTeamComponent
           )
       },
       {
@@ -66,6 +82,27 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/areas/area-list/area-list.component').then(
             (m) => m.AreaListComponent
+          )
+      },
+      {
+        path: 'users',
+        loadComponent: () =>
+          import('./features/admin/users/user-list/user-list.component').then(
+            (m) => m.UserListComponent
+          )
+      },
+      {
+        path: 'team',
+        loadComponent: () =>
+          import('./features/team/team-list/team-list.component').then(
+            (m) => m.TeamListComponent
+          )
+      },
+      {
+        path: 'team/workload',
+        loadComponent: () =>
+          import('./features/team/team-workload/team-workload.component').then(
+            (m) => m.TeamWorkloadComponent
           )
       },
       {

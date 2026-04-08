@@ -1,1 +1,53 @@
-<p>team-workload.component works!</p>
+<div class="workload-container">
+  <div class="page-header mb-4">
+    <h1 class="page-title">
+      <i class="fas fa-tasks"></i>
+      Carga de Trabajo
+    </h1>
+
+    <div class="area-selector" *ngIf="allAreas().length > 1">
+      <select class="form-select form-select-sm" (change)="onAreaChange($event)">
+        <option *ngFor="let area of allAreas()" [value]="area.areaId" [selected]="area.areaId === selectedAreaId()">
+          {{ area.areaName }}
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <app-loading-spinner *ngIf="loading()" message="Cargando carga de trabajo..."></app-loading-spinner>
+
+  <div class="row" *ngIf="!loading()">
+    <div class="col-12 mb-4" *ngFor="let member of members()">
+      <div class="workload-card">
+        <div class="member-info">
+          <div class="member-avatar">
+            {{ member.firstName[0] }}{{ member.lastName[0] }}
+          </div>
+          <div class="member-details">
+            <div class="member-name">{{ member.fullName }}</div>
+            <div class="member-role text-secondary">{{ getRoleLabel(member.role) }}</div>
+          </div>
+        </div>
+        <div class="workload-bar-container">
+          <div class="d-flex justify-content-between mb-1">
+            <small class="text-secondary">Tickets asignados</small>
+            <small class="fw-bold">{{ ticketStats()[member.userId] ?? 0 }}</small>
+          </div>
+          <div class="progress" style="height: 10px;">
+            <div
+              class="progress-bar"
+              [ngClass]="getWorkloadColor(member.userId)"
+              [style.width]="getWorkloadBarWidth(member.userId)"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center text-secondary mt-4" *ngIf="!loading() && members().length === 0">
+    <i class="fas fa-info-circle me-2"></i>
+    No hay miembros en el equipo seleccionado
+  </div>
+</div>
+
