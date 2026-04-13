@@ -5,7 +5,7 @@ import { AreaServices } from '../../../core/services/area.service';
 import { TeamServices } from '../../../core/services/team.service';
 import { NotificationServices } from '../../../core/services/notification.service';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { TicketDetail } from '../../../core/models/ticket.model';
+import { TicketDetail, AssignTicketRequest } from '../../../core/models/ticket.model';
 import { Area } from '../../../core/models/user.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
@@ -38,17 +38,17 @@ export class AssignComponent implements OnInit{
   form: FormGroup;
 
   priorityOptions = [
-    { value: 'CRITICAL', label: 'CRÍTICA', icon: 'fa-exclamation-circle text-danger' },
-    { value: 'HIGH', label: 'ALTA', icon: 'fa-arrow-up text-warning' },
-    { value: 'MEDIUM', label: 'MEDIA', icon: 'fa-minus-circle text-info' },
-    { value: 'LOW', label: 'BAJA', icon: 'fa-check-circle text-success' }
+    { value: 'Critical', label: 'CRÍTICA', icon: 'fa-exclamation-circle text-danger' },
+    { value: 'High', label: 'ALTA', icon: 'fa-arrow-up text-warning' },
+    { value: 'Medium', label: 'MEDIA', icon: 'fa-minus-circle text-info' },
+    { value: 'Low', label: 'BAJA', icon: 'fa-check-circle text-success' }
   ];
 
   constructor() {
     this.form = this.fb.group({
       areaId: ['', Validators.required],
       developerId: ['', Validators.required],
-      priority: ['MEDIUM', Validators.required]
+      priority: ['Medium', Validators.required]
     });
   }
 
@@ -117,12 +117,12 @@ export class AssignComponent implements OnInit{
 
     this.submitting.set(true);
 
-    const request = {
-      jefeAreaId: this.form.get('developerId')?.value,
-      priorityCode: this.form.get('priority')?.value
+    const request: AssignTicketRequest = {
+      developerId: this.form.get('developerId')?.value,
+      priority: this.form.get('priority')?.value
     };
 
-    this.ticketService.assignTicket(this.ticket()!.ticketId, request.jefeAreaId, request.priorityCode)
+    this.ticketService.assignTicket(this.ticket()!.ticketId, request)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {

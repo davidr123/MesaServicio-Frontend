@@ -2,8 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../enviroments/enviroment';
 import { Observable, shareReplay, Subject, tap } from 'rxjs';
-import { CreateIncidentRequest, CreateRequirementRequest, PagedResult, ReasignRequest, Ticket, TicketDetail, TicketStatus } from '../models/ticket.model';
-import { AddCommentRequest } from '../models/comment.model';
+import { CreateIncidentRequest, CreateRequirementRequest, PagedResult, ReasignRequest, Ticket, TicketDetail, TicketStatus, AddCommentRequest, AssignTicketRequest } from '../models/ticket.model';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +10,7 @@ import { AddCommentRequest } from '../models/comment.model';
 export class TicketServices {
 
   private http = inject(HttpClient);
-  private readonly apiUrl = `${environment.apiUrl}/Tickets`;
+  private readonly apiUrl = `${environment.apiUrl}/tickets`;
   private ticketRefresh$ = new Subject<void>();
 
   getTicketRefresh$(): Observable<void> {
@@ -77,14 +76,10 @@ export class TicketServices {
 
   assignTicket(
     ticketId: number,
-    developerId: number,
-    priority: string
+    request: AssignTicketRequest
   ): Observable<Ticket> {
     return this.http
-      .put<Ticket>(`${this.apiUrl}/${ticketId}/assign`, {
-        developerId,
-        priority
-      })
+      .put<Ticket>(`${this.apiUrl}/${ticketId}/assign`, request)
       .pipe(
         tap(() => this.ticketRefresh$.next()),
         shareReplay(1)
@@ -159,7 +154,7 @@ export class TicketServices {
       );
   }
 
-  updateTicketStatus(ticketId: number, status: string): Observable<Ticket> {
+  updateTicketStatus(ticketId: number, status: TicketStatus): Observable<Ticket> {
     return this.http
       .put<Ticket>(`${this.apiUrl}/${ticketId}/status`, { status })
       .pipe(

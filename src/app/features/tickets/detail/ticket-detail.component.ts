@@ -2,7 +2,7 @@ import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TicketServices } from '../../../core/services/ticket.service';
-import { TicketDetail, UserRole, CommentType } from '../../../core/models/ticket.model';
+import { TicketDetail, UserRole, CommentType, TicketStatus } from '../../../core/models/ticket.model';
 import { ActivatedRoute } from '@angular/router';
 import { LoadingSpinnerComponent } from '../../../core/shared/components/loading-spinner/loading-spinner.component';
 import { AuthServices } from '../../../core/services/auth.service';
@@ -36,7 +36,7 @@ export class DetailComponent implements OnInit, OnDestroy {
   constructor() {
     this.commentForm = this.fb.group({
       text: ['', [Validators.required, Validators.minLength(5)]],
-      commentType: [CommentType.PUBLIC_ACTION, Validators.required],
+      commentType: [CommentType.Published, Validators.required],
       isInternal: [false]
     });
   }
@@ -76,13 +76,12 @@ export class DetailComponent implements OnInit, OnDestroy {
     this.commentLoading.set(true);
 
     const commentType = this.commentForm.get('commentType')?.value as CommentType;
-    const isInternal = commentType === CommentType.INTERNAL_ACTION
+    const isInternal = commentType === CommentType.Internal
       ? true
       : this.commentForm.get('isInternal')?.value;
 
     const request = {
       text: this.commentForm.get('text')?.value,
-      commentType: commentType,
       isInternal: isInternal
     };
 
@@ -92,7 +91,6 @@ export class DetailComponent implements OnInit, OnDestroy {
     if (this.selectedFile()) {
       const formData = new FormData();
       formData.append('text', request.text);
-      formData.append('commentType', request.commentType);
       formData.append('isInternal', request.isInternal.toString());
       formData.append('file', this.selectedFile()!);
       observable = this.ticketService.addCommentWithFile(this.ticket()!.ticketId, formData);
@@ -105,20 +103,20 @@ export class DetailComponent implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           // Si es pregunta al usuario, cambiar estado a WAITING_USER_RESPONSE
-          if (commentType === CommentType.QUESTION_TO_USER && this.ticket()?.status === 'IN_PROGRESS') {
-            this.ticketService.updateTicketStatus(this.ticket()!.ticketId, 'WAITING_USER_RESPONSE' as any)
+          if (commentType === CommentType.Question && this.ticket()?.status === TicketStatus.InProgress) {
+            this.ticketService.updateTicketStatus(this.ticket()!.ticketId, TicketStatus.OnHold)
               .pipe(takeUntil(this.destroy$))
               .subscribe({
                 next: () => {
                   this.notificationService.success('Comentario enviado y ticket en espera de respuesta del usuario');
-                  this.commentForm.reset({ commentType: CommentType.PUBLIC_ACTION });
+                  this.commentForm.reset({ commentType: CommentType.Published });
                   this.selectedFile.set(null);
                   this.commentLoading.set(false);
                   this.loadTicket(this.ticket()!.ticketId);
                 },
                 error: () => {
                   this.notificationService.success('Comentario agregado (estado podría no haberse actualizado)');
-                  this.commentForm.reset({ commentType: CommentType.PUBLIC_ACTION });
+                  this.commentForm.reset({ commentType: CommentType.Published });
                   this.selectedFile.set(null);
                   this.commentLoading.set(false);
                   this.loadTicket(this.ticket()!.ticketId);
@@ -126,7 +124,7 @@ export class DetailComponent implements OnInit, OnDestroy {
               });
           } else {
             this.notificationService.success('Comentario agregado exitosamente');
-            this.commentForm.reset({ commentType: CommentType.PUBLIC_ACTION });
+            this.commentForm.reset({ commentType: CommentType.Published });
             this.selectedFile.set(null);
             this.commentLoading.set(false);
             this.loadTicket(this.ticket()!.ticketId);
@@ -161,11 +159,11 @@ export class DetailComponent implements OnInit, OnDestroy {
     }
   }
   canAddComments(): boolean {
-    return this.currentUserRole() === 'ADMIN' || this.currentUserRole() === 'DEVELOPER';
+    return this.currentUserRole() === UserRole.Admin || this.currentUserRole() === UserRole.Developer;
   }
 
   canSeeInternalComments(): boolean {
-    return this.currentUserRole() === 'ADMIN' || this.currentUserRole() === 'DEVELOPER';
+    return this.currentUserRole() === UserRole.Admin || this.currentUserRole() === UserRole.Developer;
   }
 
   hasAttachments(): boolean {
@@ -186,48 +184,52 @@ export class DetailComponent implements OnInit, OnDestroy {
 
   getPriorityIcon(priority: string): string {
     const icons: Record<string, string> = {
-      CRITICAL: 'fa-exclamation-circle text-danger',
-      HIGH: 'fa-arrow-up text-warning',
-      MEDIUM: 'fa-minus-circle text-info',
-      LOW: 'fa-check-circle text-success'
+      Critical: 'fa-exclamation-circle text-danger',
+      High: 'fa-arrow-up text-warning',
+      Medium: 'fa-minus-circle text-info',
+      Low: 'fa-check-circle text-success'
     };
     return icons[priority] ?? 'fa-circle text-secondary';
   }
 
   getStatusLabel(status: string): string {
     const labels: Record<string, string> = {
-      PENDING_ASSIGNMENT: 'Pendiente',
-      IN_PROGRESS: 'En Proceso',
-      CERTIFICATION: 'Certificación',
-      CLOSED: 'Cerrado'
+      Open: 'Abierto',
+      PendingAssignment: 'Pendiente',
+      InProgress: 'En Proceso',
+      OnHold: 'En Espera',
+      Closed: 'Cerrado',
+      Reopened: 'Reabierto'
     };
     return labels[status] ?? status;
   }
 
   getStatusBadgeClass(status: string): string {
     const classes: Record<string, string> = {
-      PENDING_ASSIGNMENT: 'badge-status-pending',
-      IN_PROGRESS: 'badge-status-in-progress',
-      CERTIFICATION: 'badge-status-certification',
-      CLOSED: 'badge-status-closed'
+      Open: 'badge-status-pending',
+      PendingAssignment: 'badge-status-pending',
+      InProgress: 'badge-status-in-progress',
+      OnHold: 'badge-status-certification',
+      Closed: 'badge-status-closed',
+      Reopened: 'badge-status-in-progress'
     };
     return classes[status] ?? '';
   }
 
   getCommentTypeLabel(type: CommentType): string {
     const labels: Record<CommentType, string> = {
-      [CommentType.QUESTION_TO_USER]: 'Pregunta al Usuario',
-      [CommentType.PUBLIC_ACTION]: 'Acción Publicada',
-      [CommentType.INTERNAL_ACTION]: 'Acción Interna'
+      [CommentType.Question]: 'Pregunta al Usuario',
+      [CommentType.Published]: 'Acción Publicada',
+      [CommentType.Internal]: 'Acción Interna'
     };
     return labels[type] ?? type;
   }
 
   getCommentTypeBadgeClass(type: CommentType): string {
     const classes: Record<CommentType, string> = {
-      [CommentType.QUESTION_TO_USER]: 'bg-info text-white',
-      [CommentType.PUBLIC_ACTION]: 'bg-success text-white',
-      [CommentType.INTERNAL_ACTION]: 'bg-warning text-dark'
+      [CommentType.Question]: 'bg-info text-white',
+      [CommentType.Published]: 'bg-success text-white',
+      [CommentType.Internal]: 'bg-warning text-dark'
     };
     return classes[type] ?? 'bg-secondary text-white';
   }

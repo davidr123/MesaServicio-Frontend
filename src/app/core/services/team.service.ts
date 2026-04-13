@@ -10,7 +10,7 @@ import { Area } from '../models/user.model';
 })
 export class TeamServices {
   private http = inject(HttpClient);
-  private readonly areasUrl = `${environment.apiUrl}/Areas`;
+  private readonly areasUrl = `${environment.apiUrl}/areas`;
 
   getTeamMembers(areaId: number): Observable<UserBasic[]> {
     return this.http.get<UserBasic[]>(`${this.areasUrl}/${areaId}/members`);

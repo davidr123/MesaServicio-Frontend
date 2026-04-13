@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { environment } from '../../../enviroments/enviroment.prod';
+import { environment } from '../../../enviroments/enviroment';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { LoginRequest, LoginResponse, User } from '../models/user.model';
 import { UserRole } from '../models/ticket.model';
@@ -60,15 +60,15 @@ export class AuthServices {
   }
 
   isAdmin(): boolean {
-    return this.hasRole(UserRole.ADMIN);
+    return this.hasRole(UserRole.Admin);
   }
 
   isDeveloper(): boolean {
-    return this.hasRole(UserRole.DEVELOPER);
+    return this.hasRole(UserRole.Developer);
   }
 
   isUser(): boolean {
-    return this.hasRole(UserRole.USER);
+    return this.hasRole(UserRole.User);
   }
 
   private storeUser(response: LoginResponse): void {

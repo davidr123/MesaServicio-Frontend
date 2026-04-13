@@ -1,33 +1,36 @@
 
 export enum TicketStatus {
-  PENDING_ASSIGNMENT = 'PENDING_ASSIGNMENT',
-  IN_PROGRESS = 'IN_PROGRESS',
-  CERTIFICATION = 'CERTIFICATION',
-  CLOSED = 'CLOSED'
+  Open = 'Open',
+  PendingAssignment = 'PendingAssignment',
+  InProgress = 'InProgress',
+  OnHold = 'OnHold',
+  Closed = 'Closed',
+  Reopened = 'Reopened'
 }
 
 export enum TicketType {
-  INCIDENT = 'INCIDENT',
-  CHANGE_REQUEST = 'CHANGE_REQUEST'
+  Incident = 'Incident',
+  Requirement = 'Requirement',
+  ChangeRequest = 'ChangeRequest'
 }
 
 export enum TicketPriority {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL'
+  Low = 'Low',
+  Medium = 'Medium',
+  High = 'High',
+  Critical = 'Critical'
 }
 
 export enum UserRole {
-  USER = 'USER',
-  ADMIN = 'ADMIN',
-  DEVELOPER = 'DEVELOPER'
+  Admin = 'Admin',
+  Developer = 'Developer',
+  User = 'User'
 }
 
 export enum CommentType {
-  QUESTION_TO_USER = 'QUESTION_TO_USER',
-  PUBLIC_ACTION = 'PUBLIC_ACTION',
-  INTERNAL_ACTION = 'INTERNAL_ACTION'
+  Internal = 'Internal',
+  Published = 'Published',
+  Question = 'Question'
 }
 
 export interface Ticket {
@@ -47,6 +50,7 @@ export interface Ticket {
   readonly assignedArea: AreaBasic | null;
   readonly createdDate: Date;
   readonly dueDate: Date | null;
+  readonly closedDate: Date | null;
   readonly slaHours: number;
   readonly hoursElapsed: number;
   readonly commentCount: number;
@@ -55,16 +59,15 @@ export interface Ticket {
 
 export interface TicketDetail extends Ticket {
   readonly comments: Comment[];
-  readonly internalComments: Comment[];
   readonly timeEntries: TimeEntry[];
   readonly attachments: Attachment[];
 }
 
 export interface PagedResult<T> {
-  readonly items: readonly T[];
-  readonly totalCount: number;
+  readonly data: readonly T[];
   readonly pageNumber: number;
   readonly pageSize: number;
+  readonly totalRecords: number;
   readonly totalPages: number;
 }
 
@@ -72,7 +75,6 @@ export interface Comment {
   readonly commentId: number;
   readonly text: string;
   readonly isInternal: boolean;
-  readonly commentType: CommentType;
   readonly createdBy: UserBasic;
   readonly createdDate: Date;
 }
@@ -88,7 +90,7 @@ export interface TimeEntry {
 export interface Attachment {
   readonly attachmentId: number;
   readonly fileName: string;
-  readonly fileSize: number;
+  readonly fileSizeBytes: number;
   readonly uploadedDate: Date;
 }
 
@@ -114,12 +116,23 @@ export interface UserBasic {
   readonly fullName: string;
   readonly role: UserRole;
   readonly areaId?: number;
+  readonly areaName?: string;
 }
 
 export interface AreaBasic {
   readonly areaId: number;
   readonly areaCode: string;
   readonly areaName: string;
+}
+
+export interface AddCommentRequest {
+  readonly text: string;
+  readonly isInternal: boolean;
+}
+
+export interface AssignTicketRequest {
+  readonly developerId: number;
+  readonly priority: string;
 }
 
 export interface ReasignRequest {
