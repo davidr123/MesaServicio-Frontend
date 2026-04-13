@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { TicketServices } from '../../../core/services/ticket.service';
 import { AuthServices } from '../../../core/services/auth.service';
-import { PagedResult, Ticket, TicketStatus } from '../../../core/models/ticket.model';
+import { PagedResult, Ticket, TicketStatus, UserRole } from '../../../core/models/ticket.model';
 import { LoadingSpinnerComponent } from '../../../core/shared/components/loading-spinner/loading-spinner.component';
 import { NoDataComponent } from '../../../core/shared/components/no-data/no-data.component';
 import { Subject, takeUntil } from 'rxjs';
@@ -55,7 +55,7 @@ export class TicketListComponent implements OnInit, OnDestroy {
     this.authService.getCurrentUser()
       .pipe(takeUntil(this.destroy$))
       .subscribe((user) => {
-        this.isAdmin.set(user?.role === 'ADMIN');
+        this.isAdmin.set(user?.role === UserRole.Admin);
         this.loadTickets();
       });
   }
@@ -75,8 +75,8 @@ export class TicketListComponent implements OnInit, OnDestroy {
         this.selectedStatus() || undefined
       ).subscribe({
         next: (result: PagedResult<Ticket>) => {
-          this.tickets.set(result.items);
-          this.totalCount.set(result.totalCount);
+          this.tickets.set(result.data);
+          this.totalCount.set(result.totalRecords);
           this.loading.set(false);
         },
         error: () => this.loading.set(false)
@@ -84,8 +84,8 @@ export class TicketListComponent implements OnInit, OnDestroy {
     } else {
       this.ticketService.getMyTickets(this.pageNumber(), this.pageSize()).subscribe({
         next: (result: PagedResult<Ticket>) => {
-          this.tickets.set(result.items);
-          this.totalCount.set(result.totalCount);
+          this.tickets.set(result.data);
+          this.totalCount.set(result.totalRecords);
           this.loading.set(false);
         },
         error: () => this.loading.set(false)
@@ -122,30 +122,34 @@ export class TicketListComponent implements OnInit, OnDestroy {
 
   getPriorityIconClass(priority: string): string {
     const icons: Record<string, string> = {
-      CRITICAL: 'exclamation-circle text-danger',
-      HIGH: 'arrow-up text-warning',
-      MEDIUM: 'minus-circle text-info',
-      LOW: 'check-circle text-success'
+      Critical: 'exclamation-circle text-danger',
+      High: 'arrow-up text-warning',
+      Medium: 'minus-circle text-info',
+      Low: 'check-circle text-success'
     };
     return icons[priority] ?? 'circle text-secondary';
   }
 
   getStatusBadgeClass(status: string): string {
     const classes: Record<string, string> = {
-      PENDING_ASSIGNMENT: 'badge-status-pending',
-      IN_PROGRESS: 'badge-status-in-progress',
-      CERTIFICATION: 'badge-status-certification',
-      CLOSED: 'badge-status-closed'
+      PendingAssignment: 'badge-status-pending',
+      InProgress: 'badge-status-in-progress',
+      OnHold: 'badge-status-certification',
+      Closed: 'badge-status-closed',
+      Open: 'badge-status-pending',
+      Reopened: 'badge-status-in-progress'
     };
     return classes[status] ?? '';
   }
 
   getStatusLabel(status: string): string {
     const labels: Record<string, string> = {
-      PENDING_ASSIGNMENT: 'Pendiente',
-      IN_PROGRESS: 'En Proceso',
-      CERTIFICATION: 'Certificación',
-      CLOSED: 'Cerrado'
+      Open: 'Abierto',
+      PendingAssignment: 'Pendiente',
+      InProgress: 'En Proceso',
+      OnHold: 'En Espera',
+      Closed: 'Cerrado',
+      Reopened: 'Reabierto'
     };
     return labels[status] ?? status;
   }

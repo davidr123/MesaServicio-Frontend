@@ -10,7 +10,7 @@ import { environment } from '../../../enviroments/enviroment';
 export class AreaServices {
 
   private http = inject(HttpClient);
-  private readonly apiUrl = `${environment.apiUrl}/Areas`;
+  private readonly apiUrl = `${environment.apiUrl}/areas`;
 
   getAllAreas(): Observable<Area[]> {
     return this.http.get<Area[]>(this.apiUrl);

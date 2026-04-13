@@ -92,7 +92,7 @@
 
         <!-- buton asignacion -->
 <!-- Botón Asignar (Solo ADMIN) -->
-<div class="card mb-4" *ngIf="currentUserRole() === 'ADMIN' && t.status === 'PENDING_ASSIGNMENT'">
+<div class="card mb-4" *ngIf="currentUserRole() === 'Admin' && t.status === 'PendingAssignment'">
   <div class="card-body">
     <a
       [routerLink]="['/tickets', t.ticketId, 'assign']"
@@ -105,7 +105,7 @@
 </div>
 
 <!-- Botón Reasignar (Solo DEVELOPER si está asignado a él) -->
-<div class="card mb-4" *ngIf="currentUserRole() === 'DEVELOPER' && t.status === 'IN_PROGRESS'">
+<div class="card mb-4" *ngIf="currentUserRole() === 'Developer' && t.status === 'InProgress'">
   <div class="card-body">
     <a
       [routerLink]="['/tickets', t.ticketId, 'reassign']"
@@ -140,8 +140,8 @@
                     {{ comment.createdDate | date: 'dd/MM/yyyy HH:mm' }}
                   </small>
                 </div>
-                <span class="badge" [ngClass]="getCommentTypeBadgeClass(comment.commentType)">
-                  {{ getCommentTypeLabel(comment.commentType) }}
+                <span class="badge bg-success text-white">
+                  Publicado
                 </span>
               </div>
               <p class="comment-text mt-2">{{ comment.text }}</p>
@@ -175,8 +175,8 @@
                     {{ comment.createdDate | date: 'dd/MM/yyyy HH:mm' }}
                   </small>
                 </div>
-                <span class="badge" [ngClass]="getCommentTypeBadgeClass(comment.commentType)">
-                  {{ getCommentTypeLabel(comment.commentType) }}
+                <span class="badge bg-warning text-dark">
+                  Interno
                 </span>
               </div>
               <p class="comment-text mt-2">{{ comment.text }}</p>
@@ -203,9 +203,9 @@
                   id="comment-type"
                   formControlName="commentType"
                   class="form-select">
-                  <option [value]="'PUBLIC_ACTION'">Acción Publicada (notifica al usuario)</option>
-                  <option [value]="'QUESTION_TO_USER'">Pregunta al Usuario (requiere respuesta)</option>
-                  <option [value]="'INTERNAL_ACTION'">Acción Interna (solo el equipo ve)</option>
+                  <option [value]="'Published'">Acción Publicada (notifica al usuario)</option>
+                  <option [value]="'Question'">Pregunta al Usuario (requiere respuesta)</option>
+                  <option [value]="'Internal'">Acción Interna (solo el equipo ve)</option>
                 </select>
               </div>
 
@@ -293,7 +293,7 @@
                 <small class="text-muted">📄 {{file.fileName}}</small>
               </div>
               <div class="d-flex align-items-center">
-                <small class="me-2 text-muted">{{formatFileSize(file.fileSize ?? 0)}}</small>
+                <small class="me-2 text-muted">{{formatFileSize(file.fileSizeBytes ?? 0)}}</small>
                 <button class="btn btn-sm btn-outline-primary" title="Descargar">
                   <i class="fas fa-download"></i>
                 </button>
@@ -358,7 +358,7 @@
                 <i class="fas fa-file"></i>
                 {{ attachment.fileName }}
               </a>
-              <small class="d-block text-light">{{ (attachment.fileSize / 1024).toFixed(2) }} KB</small>
+              <small class="d-block text-light">{{ (attachment.fileSizeBytes / 1024).toFixed(2) }} KB</small>
             </div>
           </div>
         </div>
